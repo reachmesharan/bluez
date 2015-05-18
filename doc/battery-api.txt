@@ -1,0 +1,36 @@
+BlueZ D-Bus Battery API description
+***********************************
+
+
+Battery hierarchy
+=================
+
+Service		org.bluez
+Interface	org.bluez.Battery1
+Object path	[variable prefix]/{hci0,hci1,...}/dev_XX_XX_XX_XX_XX_XX
+
+Properties	boolean Present [readonly]
+
+			Whether the device has a battery present.
+
+		boolean Rechargeable [readonly]
+
+			Whether the battery built into the device is rechargeable
+			or not.
+
+		uint16 Percentage [readonly]
+
+			The percentage of battery left. Will be 0% percent if State is
+			used instead, depending on the Battery profile used by the device.
+
+		string State [readonly]
+
+			If Percentage is set, State will be an empty string. Otherwise this
+			will be one of 'unknown', 'discharging', 'charging' or
+			'fully-charged'.
+
+		string BatteryLevel [readonly]
+
+			If Percentage is set, BatteryLevel will be an empty string.
+			Otherwise this will be one of 'normal', 'critical' or
+			'unknown'.
