@@ -24,4 +24,7 @@ fi
 		--enable-sixaxis \
 		--enable-midi \
 		--enable-mesh \
+		--enable-pie \
+		--enable-cups \
+		--enable-library \
 		--disable-datafiles $*
