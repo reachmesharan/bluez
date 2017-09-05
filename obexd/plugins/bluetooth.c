@@ -302,6 +302,9 @@ static int register_profile(struct bluetooth_profile *profile)
 					&opt);
 	dict_append_entry(&opt, "AutoConnect", DBUS_TYPE_BOOLEAN,
 								&auto_connect);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 	if (profile->driver->record) {
 		if (profile->driver->port != 0)
 			xml = g_markup_printf_escaped(profile->driver->record,
@@ -312,6 +315,7 @@ static int register_profile(struct bluetooth_profile *profile)
 			xml = g_markup_printf_escaped(profile->driver->record,
 						profile->driver->channel,
 						profile->driver->name);
+#pragma GCC diagnostic pop
 		dict_append_entry(&opt, "ServiceRecord", DBUS_TYPE_STRING,
 								&xml);
 		g_free(xml);
