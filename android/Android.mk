@@ -41,7 +41,6 @@ LOCAL_SRC_FILES := \
 	bluez/android/bluetooth.c \
 	bluez/profiles/scanparam/scpp.c \
 	bluez/profiles/deviceinfo/dis.c \
-	bluez/profiles/battery/bas.c \
 	bluez/profiles/input/hog-lib.c \
 	bluez/android/hidhost.c \
 	bluez/android/socket.c \

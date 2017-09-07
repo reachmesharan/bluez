@@ -57,7 +57,6 @@
 
 #include "profiles/scanparam/scpp.h"
 #include "profiles/deviceinfo/dis.h"
-#include "profiles/battery/bas.h"
 #include "profiles/input/hog-lib.h"
 
 #define HOG_UUID		"00001812-0000-1000-8000-00805f9b34fb"
@@ -105,7 +104,6 @@ struct bt_hog {
 	uint16_t		setrep_id;
 	struct bt_scpp		*scpp;
 	struct bt_dis		*dis;
-	struct queue		*bas;
 	GSList			*instances;
 	struct queue		*gatt_op;
 };
@@ -1174,7 +1172,6 @@ static void hog_free(void *data)
 
 	bt_hog_detach(hog);
 
-	queue_destroy(hog->bas, (void *) bt_bas_unref);
 	g_slist_free_full(hog->instances, hog_free);
 
 	bt_scpp_unref(hog->scpp);
@@ -1323,7 +1320,6 @@ static struct bt_hog *hog_new(int fd, const char *name, uint16_t vendor,
 		return NULL;
 
 	hog->gatt_op = queue_new();
-	hog->bas = queue_new();
 
 	if (fd < 0)
 		hog->uhid = bt_uhid_new_default();
@@ -1332,7 +1328,7 @@ static struct bt_hog *hog_new(int fd, const char *name, uint16_t vendor,
 
 	hog->uhid_fd = fd;
 
-	if (!hog->gatt_op || !hog->bas || !hog->uhid) {
+	if (!hog->gatt_op || !hog->uhid) {
 		hog_free(hog);
 		return NULL;
 	}
@@ -1483,16 +1479,6 @@ static void hog_attach_dis(struct bt_hog *hog, struct gatt_primary *primary)
 	}
 }
 
-static void hog_attach_bas(struct bt_hog *hog, struct gatt_primary *primary)
-{
-	struct bt_bas *instance;
-
-	instance = bt_bas_new(primary);
-
-	bt_bas_attach(instance, hog->attrib);
-	queue_push_head(hog->bas, instance);
-}
-
 static void hog_attach_hog(struct bt_hog *hog, struct gatt_primary *primary)
 {
 	struct bt_hog *instance;
@@ -1555,11 +1541,6 @@ static void primary_cb(uint8_t status, GSList *services, void *user_data)
 			continue;
 		}
 
-		if (strcmp(primary->uuid, BATTERY_UUID) == 0) {
-			hog_attach_bas(hog, primary);
-			continue;
-		}
-
 		if (strcmp(primary->uuid, HOG_UUID) == 0)
 			hog_attach_hog(hog, primary);
 	}
@@ -1584,8 +1565,6 @@ bool bt_hog_attach(struct bt_hog *hog, void *gatt)
 
 	if (hog->dis)
 		bt_dis_attach(hog->dis, gatt);
-
-	queue_foreach(hog->bas, (void *) bt_bas_attach, gatt);
 
 	for (l = hog->instances; l; l = l->next) {
 		struct bt_hog *instance = l->data;
@@ -1624,8 +1603,6 @@ void bt_hog_detach(struct bt_hog *hog)
 
 	if (!hog->attrib)
 		return;
-
-	queue_foreach(hog->bas, (void *) bt_bas_detach, NULL);
 
 	for (l = hog->instances; l; l = l->next) {
 		struct bt_hog *instance = l->data;
