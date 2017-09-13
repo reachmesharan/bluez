@@ -478,6 +478,8 @@ MAINTAINERCLEANFILES = Makefile.in \
 
 SED_PROCESS = $(AM_V_GEN)$(MKDIR_P) $(dir $@) && \
 		$(SED) -e 's,@libexecdir\@,$(libexecdir),g' \
+		       -e 's,@statedir\@,$(statedir),g' \
+		       -e 's,@confdir\@,$(confdir),g' \
 		< $< > $@
 
 %.service: %.service.in Makefile
