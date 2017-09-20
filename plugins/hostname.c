@@ -307,6 +307,10 @@ static int hostname_init(void)
 		hostname_proxy = NULL;
 		g_dbus_client_unref(hostname_client);
 		hostname_client = NULL;
+	} else {
+		g_dbus_proxy_refresh_property(hostname_proxy, "PrettyHostname");
+		g_dbus_proxy_refresh_property(hostname_proxy, "StaticHostname");
+		g_dbus_proxy_refresh_property(hostname_proxy, "Chassis");
 	}
 
 	return err;
