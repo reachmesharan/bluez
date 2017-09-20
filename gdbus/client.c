@@ -241,8 +241,14 @@ static void add_property(GDBusProxy *proxy, const char *name,
 	g_hash_table_replace(proxy->prop_list, prop->name, prop);
 
 done:
-	if (proxy->prop_func)
+	if (proxy->prop_func) {
+		if (g_strcmp0(proxy->client->service_name, "org.freedesktop.hostname1") == 0)
+			g_message ("adding property %s name", name);
 		proxy->prop_func(proxy, name, &value, proxy->prop_data);
+	} else {
+		if (g_strcmp0(proxy->client->service_name, "org.freedesktop.hostname1") == 0)
+			g_message ("not adding property %s name", name);
+	}
 
 	if (client == NULL || send_changed == FALSE)
 		return;
@@ -401,8 +407,14 @@ static gboolean properties_changed(DBusConnection *conn, DBusMessage *msg,
 
 		g_hash_table_remove(proxy->prop_list, name);
 
-		if (proxy->prop_func)
+		if (proxy->prop_func) {
+			if (g_strcmp0(proxy->client->service_name, "org.freedesktop.hostname1") == 0)
+				g_message ("adding property %s name", name);
 			proxy->prop_func(proxy, name, NULL, proxy->prop_data);
+		} else {
+			if (g_strcmp0(proxy->client->service_name, "org.freedesktop.hostname1") == 0)
+				g_message ("not adding property %s name", name);
+		}
 
 		if (client->property_changed)
 			client->property_changed(proxy, name, NULL,
@@ -918,6 +930,9 @@ gboolean g_dbus_proxy_set_property_watch(GDBusProxy *proxy,
 	if (proxy == NULL)
 		return FALSE;
 
+	if (g_strcmp0(proxy->client->service_name, "org.freedesktop.hostname1") == 0)
+		g_message("g_dbus_proxy_set_property_watch() success");
+
 	proxy->prop_func = function;
 	proxy->prop_data = user_data;
 
@@ -1123,6 +1138,8 @@ done:
 	client->get_objects_call = NULL;
 
 	refresh_properties(client->proxy_list);
+	if (g_strcmp0(client->service_name, "org.freedesktop.hostname1") == 0)
+		g_message("refreshing properties");
 
 	g_dbus_client_unref(client);
 }
@@ -1131,30 +1148,46 @@ static void get_managed_objects(GDBusClient *client)
 {
 	DBusMessage *msg;
 
-	if (!client->connected)
+	if (g_strcmp0(client->service_name, "org.freedesktop.hostname1") == 0)
+		g_message("get_managed_objects org.freedesktop.hostname1");
+
+	if (!client->connected) {
+		if (g_strcmp0(client->service_name, "org.freedesktop.hostname1") == 0)
+			g_message("client not connected");
 		return;
+	}
 
 	if ((!client->proxy_added && !client->proxy_removed) ||
 							!client->root_path) {
+		if (g_strcmp0(client->service_name, "org.freedesktop.hostname1") == 0)
+			g_message("refreshing properties");
 		refresh_properties(client->proxy_list);
 		return;
 	}
 
-	if (client->get_objects_call != NULL)
+	if (client->get_objects_call != NULL) {
+		if (g_strcmp0(client->service_name, "org.freedesktop.hostname1") == 0)
+			g_message("get objects call failed");
 		return;
+	}
 
 	msg = dbus_message_new_method_call(client->service_name,
 						client->root_path,
 						DBUS_INTERFACE_OBJECT_MANAGER,
 						"GetManagedObjects");
-	if (msg == NULL)
+	if (msg == NULL) {
+		if (g_strcmp0(client->service_name, "org.freedesktop.hostname1") == 0)
+			g_message("msg is null");
 		return;
+	}
 
 	dbus_message_append_args(msg, DBUS_TYPE_INVALID);
 
 	if (g_dbus_send_message_with_reply(client->dbus_conn, msg,
 				&client->get_objects_call, -1) == FALSE) {
 		dbus_message_unref(msg);
+		if (g_strcmp0(client->service_name, "org.freedesktop.hostname1") == 0)
+			g_message("failed to send mesg");
 		return;
 	}
 
