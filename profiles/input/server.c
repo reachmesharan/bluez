@@ -135,7 +135,8 @@ static bool dev_is_sixaxis(const bdaddr_t *src, const bdaddr_t *dst)
 
 	type = get_pairing_type(vid, pid, NULL, NULL, NULL);
 	if (type == CABLE_PAIRING_SIXAXIS ||
-	    type == CABLE_PAIRING_DS4)
+	    type == CABLE_PAIRING_DS4 ||
+	    type == CABLE_PAIRING_PS3_WIRELESS_KEYPAD)
 		return true;
 
 	return false;
